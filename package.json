@@ -1,0 +1,12 @@
+{
+  "name": "maze-dive-templo",
+  "version": "1.0.0",
+  "description": "A procedurally generated 3D Aztec temple maze built with Three.js",
+  "private": true,
+  "scripts": {
+    "dev": "npx serve .",
+    "start": "npx serve ."
+  },
+  "keywords": ["maze", "three.js", "game", "aztec", "procedural-generation"],
+  "license": "MIT"
+}
