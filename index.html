@@ -13,47 +13,96 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="static/css/style.css">
+<link rel="stylesheet" href="static/css/style.css?v=1.2.0-settings-20261010">
 </head>
 <body>
 <canvas id="c"></canvas><div id="vig"></div>
 <div id="hud"><span id="info"></span><span id="pips"></span></div>
-<button id="mute" aria-label="Mute sound">🔊</button>
+<div id="cursorHint" hidden>Cursor free · Click the game or press Alt to look</div>
+<button id="mute" title="Mute / unmute (N)" aria-label="Mute sound">🔊</button>
+<button id="settings" aria-label="Pause and open settings" hidden>⚙</button>
+<aside id="mapMemory" aria-label="Map held in your hand: snapshot from your last Eagle Sight" hidden>
+  <img class="map-art" src="static/assets/held-map-v2.webp" width="840" height="840" alt="" aria-hidden="true" draggable="false">
+  <div class="map-paper"><span class="map-title">Eagle memory</span><canvas id="mapCanvas" width="240" height="240" aria-label="Map snapshot, gold marks your recorded position and jade marks the exit"></canvas><small>Gold: you then · Jade: exit</small><span class="map-seal" aria-hidden="true">◇</span></div>
+</aside>
 <div id="inv"></div><div id="toast" role="status"></div>
 <div id="joy"><div id="knob"></div></div>
 <div id="touch"><button id="bUse">Use</button><button id="bBird">Eagle</button><button id="bJump">Leap</button><button id="bCrumb">Mark</button></div>
 
-<div id="menu" class="ov"><div class="card">
-  <h1>Maze Dive: Templo</h1>
-  <p style="color:var(--jade);font-size:13px;margin:0 0 12px;letter-spacing:1.5px;text-transform:uppercase;opacity:.8">☀ A procedurally generated temple labyrinth ☀</p>
-  <p>Descend into the sun temple. Follow the jade light out. A guardian walks when you look away.</p>
-  <h2>Mode</h2>
-  <div class="g" id="modes">
-    <button class="opt on" data-m="classic"><b>Classic</b>One-time blessings and 6 ochre handprints. Spend them wisely.</button>
-    <button class="opt" data-m="purist"><b>Purist</b>No blessings. 3 Eagle Sight looks per level, unlimited handprints.</button>
+<div id="menu" class="ov"><div class="menu-shell">
+  <header class="intro-panel">
+    <div class="eyebrow"><span class="status-dot"></span> THE SUN TEMPLE AWAITS</div>
+    <svg class="temple-seal" viewBox="0 0 180 180" aria-hidden="true"><g fill="none" stroke="currentColor"><circle cx="90" cy="90" r="80"/><circle cx="90" cy="90" r="66" stroke-dasharray="2 8"/><path d="M90 13v23m0 108v23M13 90h23m108 0h23M35 35l17 17m76 76 17 17M35 145l17-17m76-76 17-17"/><path d="M43 122h94v-14h-13V94h-13V80H99V65H81v15H69v14H56v14H43z" stroke-width="2"/><path d="M81 122V99h18v23M74 52h32M90 42v20"/></g></svg>
+    <h1>Maze Dive<span>Templo</span></h1>
+    <p class="intro-copy">Find your way through forgotten stone.<br>Trust your memory. Follow the jade light.</p>
+    <div class="journey-notes"><span>01 <b>Survey the maze</b></span><span>02 <b>Descend into the temple</b></span><span>03 <b>Find your way out</b></span></div>
+    <button class="text-button" data-open-help>View controls <kbd>F1</kbd></button>
+  </header>
+  <div class="card setup-card">
+    <div class="panel-heading"><div><div class="eyebrow">YOUR EXPEDITION</div><h2>Prepare to descend</h2></div><span class="pill">Seeded worlds</span></div>
+    <section class="setup-section"><h3>Choose your path</h3><div class="g" id="modes">
+      <button class="opt on" data-m="classic" aria-pressed="true"><b>Classic</b><span>Blessings, limited handprints, a little help.</span></button>
+      <button class="opt" data-m="purist" aria-pressed="false"><b>Purist</b><span>Your memory, three Eagle looks, endless marks.</span></button>
+    </div></section>
+    <section class="setup-section"><div class="section-label"><h3>Temple size</h3><span id="capNote">5–40 cells · touch up to 30</span></div><div class="g g2" id="sizes">
+      <button class="opt" data-s="10" aria-pressed="false"><b>Small</b><span>10 × 10</span></button>
+      <button class="opt on" data-s="15" aria-pressed="true"><b>Medium</b><span>15 × 15</span></button>
+      <button class="opt" data-s="20" aria-pressed="false"><b>Large</b><span>20 × 20</span></button>
+      <button class="opt" data-s="0" aria-pressed="false"><b>Custom</b><span>Your dimensions</span></button>
+    </div><div class="row" id="cust" style="display:none"><label>Width <input type="number" id="cw" min="5" max="40" value="16"></label><label>Height <input type="number" id="ch" min="5" max="40" value="10"></label></div></section>
+    <div class="seed-row"><label for="seed">World seed <span>optional</span></label><input type="text" id="seed" placeholder="A word to remember this place" maxlength="20"></div>
+    <div class="rule-options"><label><input type="checkbox" id="grow"> Grow each level</label><label><input type="checkbox" id="guard" checked> Temple guardian</label><label id="autoRow" style="display:none"><input type="checkbox" id="auto"> Auto handprints</label></div>
+    <div class="launch-actions"><button class="secondary-button" id="openSettings" aria-haspopup="dialog" aria-controls="preSettings">Settings <span aria-hidden="true">⚙</span></button><button class="go" id="start">Enter the temple <span aria-hidden="true">↗</span></button></div>
+    <p class="entry-note">Every descent is a new way to get lost.</p>
   </div>
-  <h2>Temple size</h2>
-  <div class="g g2" id="sizes">
-    <button class="opt" data-s="10"><b>Small</b>10 x 10</button>
-    <button class="opt on" data-s="15"><b>Medium</b>15 x 15</button>
-    <button class="opt" data-s="20"><b>Large</b>20 x 20</button>
-    <button class="opt" data-s="0"><b>Custom</b>Any rectangle</button>
-  </div>
-  <div class="row" id="cust" style="display:none"><label>Width <input type="number" id="cw" min="5" max="40" value="16"></label><label>Height <input type="number" id="ch" min="5" max="40" value="10"></label></div>
-  <p class="small" id="capNote">Sizes are in cells, 5 to 40. Phones are capped at 30 to stay smooth.</p>
-  <div class="row"><label><input type="checkbox" id="grow"> Grow by 1 cell each level</label></div>
-  <div class="row"><input type="text" id="seed" placeholder="Seed (optional)" maxlength="20"></div>
-  <div class="row" id="autoRow" style="display:none"><label><input type="checkbox" id="auto"> Drop handprints automatically</label></div>
-  <div class="row"><label><input type="checkbox" id="guard" checked> The guardian haunts the temple</label></div>
-  <button class="go" id="start">Enter</button>
-  <p class="small" style="margin-top:12px">WASD move, arrows or mouse look, E use, Q cycle, B Eagle Sight, F handprint, Space leap, M mute. Touch: left joystick, drag right to look. Pad: sticks, Circle, Triangle, Square, Cross, L1/R1.</p>
+</div>
+<dialog id="preSettings" aria-labelledby="preSettingsTitle"><div class="eyebrow">BEFORE YOU DESCEND</div><div class="panel-heading"><h1 id="preSettingsTitle">Settings</h1><button class="icon-close" id="dismissSettings" aria-label="Close settings">×</button></div><div class="settings-block">
+  <label class="setting-switch featured"><span><strong>Smooth camera</strong><small>Glide from Eagle Sight into the temple.</small></span><input type="checkbox" role="switch" data-pref="cameraMotion"><i class="switch-track" aria-hidden="true"></i></label>
+  <p class="setting-status" data-motion-note></p>
+  <label class="setting-switch"><span><strong>Map in hand</strong><small>Keep a memory of the maze for 24 seconds.</small></span><input type="checkbox" role="switch" data-pref="mapMemory"><i class="switch-track" aria-hidden="true"></i></label>
+  <label class="setting-switch"><span><strong>Steady torch</strong><small>Keep the light calm and consistent.</small></span><input type="checkbox" role="switch" data-pref="steadyLight"><i class="switch-track" aria-hidden="true"></i></label>
+  <label class="quality-row"><span><strong>Visual quality</strong><small>Balance sharpness and performance.</small></span><select data-pref="quality"><option value="auto">Balanced</option><option value="battery">Battery saver</option><option value="sharp">Sharper</option></select></label>
+  <p class="saved-note">Preferences are saved on this device.</p>
+</div><form method="dialog"><button class="go" id="closeSettings">Done <span aria-hidden="true">✓</span></button></form></dialog>
+</div>
+
+<div id="win" class="ov hide"><div class="card result-card"><div class="eyebrow">THE WAY IS FOUND</div><h1>Into the light.</h1><p>You escaped the temple.</p><p id="winTxt"></p><button class="go" id="next">Next temple <span aria-hidden="true">↗</span></button><button class="secondary-button" id="toMenu">Back to expedition</button></div></div>
+<div id="pause" class="ov hide" role="dialog" aria-modal="true" aria-labelledby="pauseTitle"><div class="card pause-card"><div class="eyebrow">TAKE A BREATH</div><div class="panel-heading"><h1 id="pauseTitle">Settings</h1><span class="pill">Game paused</span></div><div class="settings-block">
+  <label class="setting-switch featured"><span><strong>Smooth camera</strong><small>Glide from Eagle Sight into the temple.</small></span><input type="checkbox" role="switch" data-pref="cameraMotion"><i class="switch-track" aria-hidden="true"></i></label>
+  <p class="setting-status" data-motion-note></p>
+  <label class="setting-switch"><span><strong>Map in hand</strong><small>Keep a memory of the maze for 24 seconds.</small></span><input type="checkbox" role="switch" data-pref="mapMemory"><i class="switch-track" aria-hidden="true"></i></label>
+  <label class="setting-switch"><span><strong>Steady torch</strong><small>Keep the light calm and consistent.</small></span><input type="checkbox" role="switch" data-pref="steadyLight"><i class="switch-track" aria-hidden="true"></i></label>
+  <label class="quality-row"><span><strong>Visual quality</strong><small>Balance sharpness and performance.</small></span><select data-pref="quality"><option value="auto">Balanced</option><option value="battery">Battery saver</option><option value="sharp">Sharper</option></select></label>
+  <p class="saved-note">Preferences are saved on this device.</p>
+</div><button class="go" id="resume">Return to the temple <span aria-hidden="true">↗</span></button><button class="text-button" data-open-help>View controls <kbd>F1</kbd></button><p class="entry-note">P or Esc to resume</p></div></div>
+
+<div id="help" class="ov hide" role="dialog" aria-modal="true" aria-labelledby="helpTitle"><div class="card">
+  <h1 id="helpTitle">Controls</h1>
+  <p class="small">Play pauses while this panel is open.</p>
+  <dl class="controls-list">
+    <dt>W A S D</dt><dd>Move</dd>
+    <dt>Mouse / arrows</dt><dd>Look around</dd>
+    <dt>Left Alt</dt><dd>Free or capture the cursor. Click the game to capture it again.</dd>
+    <dt>M</dt><dd>Show or stow your held map</dd>
+    <dt>B</dt><dd>Eagle Sight: spend a charge or blessing to refresh your map</dd>
+    <dt>E</dt><dd>Use selected blessing</dd>
+    <dt>Q / 1–5</dt><dd>Cycle back / select a blessing slot</dd>
+    <dt>F</dt><dd>Leave a handprint</dd>
+    <dt>Space</dt><dd>Use Jaguar Leap (requires its blessing)</dd>
+    <dt>R</dt><dd>Center your vertical view</dd>
+    <dt>N</dt><dd>Mute or unmute</dd>
+    <dt>P / Esc</dt><dd>Pause or resume</dd>
+    <dt>F1</dt><dd>Show or close this guide</dd>
+  </dl>
+  <p class="small">Your map fades even when stowed. M does not refresh it or spend a charge.</p>
+  <p class="small"><b>Touch:</b> left joystick to move, drag the right side to look, action buttons for blessings, and the gear for pause/settings.</p>
+  <p class="small"><b>Controller:</b> sticks move/look; Circle use, Triangle Eagle Sight, Square mark, Cross leap, L1/R1 cycle, Options pause.</p>
+  <button id="closeHelp" class="go">Back to game</button>
+  <p class="small">F1 or Esc closes this guide.</p>
+  <p class="small" id="buildInfo"></p>
 </div></div>
 
-<div id="win" class="ov hide"><div class="card"><h1>☀ Out!</h1><p style="color:var(--jade);font-size:13px;margin:0 0 8px">You escaped the temple</p><p id="winTxt"></p>
-  <button class="go" id="next">Next temple</button><button class="go" id="toMenu" style="background:var(--jade);color:#1d140d;animation:none">Menu</button></div></div>
-<div id="pause" class="ov hide"><div class="card"><h1>Paused</h1><button class="go" id="resume">Resume</button></div></div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="static/js/game.js" defer></script>
+<script src="static/js/game.js?v=1.2.0-settings-20261010" defer></script>
 </body>
 </html>
